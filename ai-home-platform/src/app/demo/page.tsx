@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function DemoPage(){return <section className="editorial-demo"><h1>装修流程演示</h1><p>用模拟施工队和报价体验流程，不产生真实交易或付款。</p><div className="home-paths"><Link href="/owner/matches/demo-demand#fulfillment-demo"><h2>施工队匹配演示</h2><p>查看标签、评分与档期规则如何排序。</p><span>查看模拟匹配 ↗</span></Link><Link href="/owner/quotes/demo-demand"><h2>报价对比演示</h2><p>比较明细、单位差异与待确认费用。</p><span>查看模拟报价 ↗</span></Link></div><p className="mt-8"><Link href="/owner/matches/demo-demand">返回案例推荐</Link></p></section>}

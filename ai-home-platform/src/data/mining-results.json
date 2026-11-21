@@ -1,0 +1,307 @@
+{
+  "schemaVersion": 1,
+  "seed": 42,
+  "sources": [
+    {
+      "name": "ChineseNlpCorpus 热水器评论",
+      "url": "https://github.com/SophonPlus/ChineseNlpCorpus/tree/master/datasets/online_shopping_10_cats",
+      "scope": "中文电商评价；具体平台、地域和原始采集时间不详，并非装修订单。"
+    },
+    {
+      "name": "UCSD Google Local / Vermont",
+      "url": "https://mcauleylab.ucsd.edu/public_datasets/gdrive/googlelocal/",
+      "scope": "美国 Vermont 施工维修商家，历史数据截至 2021-09。"
+    }
+  ],
+  "inputHashes": {
+    "water_heater_clean.csv": "ad97580ae96892fa400ff8472ea39d387b5ef1d657e543a99a862ca2c459c067",
+    "providers.jsonl": "a213ecd6abd98150b7ac3bc9066adb16780ebeb5f26be96355e5a98f5aa3a9a5",
+    "reviews.jsonl": "c7d93af95c149ba6ffb062f4eaa18adcdcc6e0c2c8ed898d19cb11aa2202e676"
+  },
+  "classification": {
+    "samples": 574,
+    "negative": 100,
+    "positive": 474,
+    "groups": 567,
+    "splits": {
+      "train": {
+        "count": 344,
+        "negative": 60,
+        "positive": 284
+      },
+      "validation": {
+        "count": 115,
+        "negative": 20,
+        "positive": 95
+      },
+      "test": {
+        "count": 115,
+        "negative": 20,
+        "positive": 95
+      }
+    },
+    "selected": "字符 TF-IDF + 线性 SVM",
+    "models": [
+      {
+        "name": "多数类基线",
+        "validation": {
+          "accuracy": 0.8260869565217391,
+          "macroF1": 0.4523809523809524,
+          "negativeRecall": 0.0,
+          "confusion": [
+            [
+              0,
+              20
+            ],
+            [
+              0,
+              95
+            ]
+          ]
+        },
+        "test": {
+          "accuracy": 0.8260869565217391,
+          "macroF1": 0.4523809523809524,
+          "negativeRecall": 0.0,
+          "confusion": [
+            [
+              0,
+              20
+            ],
+            [
+              0,
+              95
+            ]
+          ]
+        }
+      },
+      {
+        "name": "字符 TF-IDF + 朴素贝叶斯",
+        "validation": {
+          "accuracy": 0.8260869565217391,
+          "macroF1": 0.4973776223776224,
+          "negativeRecall": 0.05,
+          "confusion": [
+            [
+              1,
+              19
+            ],
+            [
+              1,
+              94
+            ]
+          ]
+        },
+        "test": {
+          "accuracy": 0.8260869565217391,
+          "macroF1": 0.4523809523809524,
+          "negativeRecall": 0.0,
+          "confusion": [
+            [
+              0,
+              20
+            ],
+            [
+              0,
+              95
+            ]
+          ]
+        }
+      },
+      {
+        "name": "字符 TF-IDF + 线性 SVM",
+        "validation": {
+          "accuracy": 0.8869565217391304,
+          "macroF1": 0.780952380952381,
+          "negativeRecall": 0.55,
+          "confusion": [
+            [
+              11,
+              9
+            ],
+            [
+              4,
+              91
+            ]
+          ]
+        },
+        "test": {
+          "accuracy": 0.8956521739130435,
+          "macroF1": 0.7929171668667467,
+          "negativeRecall": 0.55,
+          "confusion": [
+            [
+              11,
+              9
+            ],
+            [
+              3,
+              92
+            ]
+          ]
+        }
+      },
+      {
+        "name": "类别平衡线性 SVM",
+        "validation": {
+          "accuracy": 0.8608695652173913,
+          "macroF1": 0.7751710654936461,
+          "negativeRecall": 0.7,
+          "confusion": [
+            [
+              14,
+              6
+            ],
+            [
+              10,
+              85
+            ]
+          ]
+        },
+        "test": {
+          "accuracy": 0.8869565217391304,
+          "macroF1": 0.7993019197207678,
+          "negativeRecall": 0.65,
+          "confusion": [
+            [
+              13,
+              7
+            ],
+            [
+              6,
+              89
+            ]
+          ]
+        }
+      }
+    ],
+    "protocol": "按规范化文本及字符三元组 Jaccard ≥ 0.85 分组，固定五折分组分层划分为训练/验证/测试约 60/20/20。向量化仅拟合训练集；以验证集 Macro-F1 选择模型，不用测试集调参。",
+    "limitations": [
+      "标签来自公开整理语料，缺少一手标注过程。",
+      "测试集较小，单次划分不能代表稳定泛化能力。",
+      "没有商家、用户或时间字段，不能评估跨商家或未来时段泛化。",
+      "近重复检测是启发式方法，不能保证消除所有语义重复。"
+    ]
+  },
+  "clustering": {
+    "providers": 170,
+    "reviews": 2981,
+    "selectedK": 3,
+    "trials": [
+      {
+        "k": 2,
+        "silhouette": 0.2416823503467165,
+        "stabilityARI": 1.0,
+        "minClusterSize": 85
+      },
+      {
+        "k": 3,
+        "silhouette": 0.2625861951589038,
+        "stabilityARI": 0.986137363513533,
+        "minClusterSize": 45
+      },
+      {
+        "k": 4,
+        "silhouette": 0.20545718712483851,
+        "stabilityARI": 0.8474790054406598,
+        "minClusterSize": 19
+      },
+      {
+        "k": 5,
+        "silhouette": 0.19956708360688116,
+        "stabilityARI": 0.9231317313689047,
+        "minClusterSize": 19
+      },
+      {
+        "k": 6,
+        "silhouette": 0.17809639215258924,
+        "stabilityARI": 0.7598875973066977,
+        "minClusterSize": 16
+      }
+    ],
+    "clusters": [
+      {
+        "id": 1,
+        "size": 47,
+        "reviewCount": 2267,
+        "meanRating": 4.665637406263785,
+        "negativeShare": 0.06440229378032643,
+        "categories": [
+          {
+            "name": "Plumber",
+            "count": 12
+          },
+          {
+            "name": "Heating contractor",
+            "count": 9
+          },
+          {
+            "name": "HVAC contractor",
+            "count": 8
+          },
+          {
+            "name": "Flooring store",
+            "count": 7
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "size": 78,
+        "reviewCount": 316,
+        "meanRating": 4.8955696202531644,
+        "negativeShare": 0.012658227848101266,
+        "categories": [
+          {
+            "name": "General contractor",
+            "count": 19
+          },
+          {
+            "name": "Electrician",
+            "count": 17
+          },
+          {
+            "name": "Contractor",
+            "count": 11
+          },
+          {
+            "name": "Heating contractor",
+            "count": 9
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "size": 45,
+        "reviewCount": 398,
+        "meanRating": 3.449748743718593,
+        "negativeShare": 0.3793969849246231,
+        "categories": [
+          {
+            "name": "Plumber",
+            "count": 14
+          },
+          {
+            "name": "Heating contractor",
+            "count": 12
+          },
+          {
+            "name": "General contractor",
+            "count": 9
+          },
+          {
+            "name": "Electrician",
+            "count": 8
+          }
+        ]
+      }
+    ],
+    "protocol": "类别多热编码归一化 + 评价量 log(1+n)、均分、低分比例标准化并块归一化；K-means，k=2..6，n_init=20。按轮廓系数选择 k，另用三个随机种子检查 ARI 稳定性。",
+    "limitations": [
+      "170 家仅为探索性小样，类别及地域筛选存在偏差。",
+      "聚类使用全期描述统计，不用于历史预测或推荐效果证明。",
+      "群体特征是聚类输入的描述，不是独立正确性标签。",
+      "不同种子的稳定性不等于抽样稳定性或业务有效性。"
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+# 等四位成员提供 GitHub 用户名并获得仓库 write 权限后，由 D 填真实 @用户名。
+# 本文件当前只有说明，不会自动请求审查，也不等同于分支保护。
+# 文件归属规则由 scripts/ownership.mjs 和 PR CI 检查。
+# GitHub CODEOWNERS 后匹配覆盖前匹配，owner/matches 和 owner/quotes 要放在 owner 规则之后。
+# * @D的真实用户名
+# /src/app/owner/ @A的真实用户名
+# /src/app/owner/matches/ @B的真实用户名
+# /src/app/owner/quotes/ @B的真实用户名
+# /src/app/api/match/ @B的真实用户名
+# /src/app/api/quote/ @B的真实用户名
+# /src/app/provider/ @C的真实用户名
+# /src/app/admin/ @C的真实用户名

@@ -1,0 +1,194 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "sqlite"
+  url = env("DATABASE_URL")
+}
+model User {
+  id String @id @default(cuid())
+  name String
+  role String @default("owner")
+  providerId String? @unique
+  provider ServiceProvider? @relation("ProviderAccount", fields: [providerId], references: [id])
+  demands DemandOrder[]
+  demoSessions DemoProviderSession[]
+  ownerSessions OwnerSession[]
+  ownerCredential OwnerCredential?
+  inspectionImages InspectionImage[]
+  orderProgressEvents OrderProgressEvent[]
+}
+model OwnerCredential {
+  userId String @id
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  login String @unique
+  passwordHash String
+}
+model OwnerLoginAttempt {
+  key String @id
+  count Int
+  resetsAt DateTime
+  @@index([resetsAt])
+}
+model OwnerSession {
+  tokenHash String @id
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  revokedAt DateTime?
+  @@index([userId])
+  @@index([expiresAt])
+}
+model DemoProviderSession {
+  tokenHash String @id
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  providerId String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  @@index([expiresAt])
+}
+model DemandOrder {
+  id String @id @default(cuid())
+  ownerId String
+  owner User @relation(fields: [ownerId], references: [id])
+  description String
+  city String
+  areaM2 Float
+  budgetMinCents Int
+  budgetMaxCents Int
+  renovationType String
+  desiredDays Int
+  status String @default("draft")
+  createdAt DateTime @default(now())
+  quotes Quote[]
+  schedules Schedule[]
+  payments Payment[]
+  reviews Review[]
+  tickets Ticket[]
+  serviceOrder ServiceOrder?
+  inspectionImages InspectionImage[]
+}
+model InspectionImage {
+  id String @id
+  ownerId String
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  demandId String
+  demand DemandOrder @relation(fields: [demandId], references: [id], onDelete: Cascade)
+  contentType String
+  sizeBytes Int
+  width Int
+  height Int
+  sha256 String
+  bytes Bytes
+  expiresAt DateTime
+  @@index([ownerId, expiresAt])
+  @@index([demandId])
+  @@index([expiresAt])
+}
+model ServiceProvider {
+  id String @id @default(cuid())
+  name String
+  city String
+  kind String
+  tagsJson String
+  rating Float @default(0)
+  quotes Quote[]
+  account User? @relation("ProviderAccount")
+  quoteSubmissionReceipts QuoteSubmissionReceipt[]
+  serviceOrders ServiceOrder[]
+}
+model Quote {
+  id String @id @default(cuid())
+  source String @default("mock")
+  demandId String
+  demand DemandOrder @relation(fields: [demandId], references: [id])
+  providerId String
+  provider ServiceProvider @relation(fields: [providerId], references: [id])
+  itemsJson String
+  knownTotalCents Int
+  pendingItemsJson String
+  estimatedDays Int
+  status String @default("draft")
+  submissionReceipt QuoteSubmissionReceipt?
+  serviceOrder ServiceOrder?
+}
+model ServiceOrder {
+  id String @id @default(cuid())
+  demandId String @unique
+  demand DemandOrder @relation(fields: [demandId], references: [id])
+  providerId String
+  provider ServiceProvider @relation(fields: [providerId], references: [id])
+  acceptedQuoteId String @unique
+  acceptedQuote Quote @relation(fields: [acceptedQuoteId], references: [id])
+  source String @default("mock")
+  status String @default("contracted")
+  review Review?
+  progressEvents OrderProgressEvent[]
+  @@index([providerId])
+}
+model OrderProgressEvent {
+  id String @id
+  orderId String
+  order ServiceOrder @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  actorId String
+  actor User @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  action String
+  fromStatus String
+  toStatus String
+  taskId String?
+  scheduleVersion Int?
+  createdAt DateTime @default(now())
+  @@index([orderId, createdAt])
+}
+model QuoteSubmissionReceipt {
+  id String @id @default(cuid())
+  providerId String
+  provider ServiceProvider @relation(fields: [providerId], references: [id])
+  idempotencyKey String
+  requestHash String
+  quoteId String @unique
+  quote Quote @relation(fields: [quoteId], references: [id])
+  createdAt DateTime @default(now())
+  @@unique([providerId, idempotencyKey])
+}
+model Schedule {
+  id String @id @default(cuid())
+  demandId String
+  demand DemandOrder @relation(fields: [demandId], references: [id])
+  version Int @default(1)
+  tasksJson String
+  @@unique([demandId, version])
+}
+model Payment {
+  id String @id @default(cuid())
+  demandId String
+  demand DemandOrder @relation(fields: [demandId], references: [id])
+  stage String
+  amountCents Int
+  status String @default("pending")
+  simulated Boolean @default(true)
+}
+model Review {
+  id String @id @default(cuid())
+  demandId String
+  demand DemandOrder @relation(fields: [demandId], references: [id])
+  providerId String
+  // Legacy rows remain unlinked; new writes must bind a verified completed order.
+  orderId String? @unique
+  order ServiceOrder? @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  source String @default("mock")
+  rating Int
+  comment String
+  @@index([demandId])
+}
+model Ticket {
+  id String @id @default(cuid())
+  demandId String
+  demand DemandOrder @relation(fields: [demandId], references: [id])
+  description String
+  category String
+  responsibleProviderId String?
+  status String @default("open")
+}

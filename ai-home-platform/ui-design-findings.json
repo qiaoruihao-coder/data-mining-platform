@@ -1,0 +1,12 @@
+[
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\PC\\Desktop\\数据挖掘\\ai-home-platform\\src\\app\\globals.css",
+    "line": 27,
+    "snippet": "cubic-bezier(0.3, 1.6, 0.6, 1)"
+  }
+]

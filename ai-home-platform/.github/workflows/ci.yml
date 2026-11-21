@@ -1,0 +1,33 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: file:./ci.db
+      AI_MODE: mock
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run db:setup
+      - run: npm run check
+      - name: Check changed-file ownership
+        if: github.event_name == 'pull_request'
+        run: node scripts/check-scope.mjs --ci
+      - run: npm run build
+      - name: Production HTTP smoke
+        run: node scripts/run-production-smoke.mjs
+        timeout-minutes: 3

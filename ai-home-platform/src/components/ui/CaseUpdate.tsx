@@ -1,0 +1,8 @@
+'use client';
+import React, {useEffect,useState} from 'react';
+import initial from '@/contracts/domestic-recommendation.json';
+export function useCases(){const [data,setData]=useState(initial);const [error,setError]=useState('');useEffect(()=>{let active=true;const load=()=>fetch('/api/cases',{cache:'no-store'}).then(r=>r.json()).then(b=>{if(!b.ok)throw new Error();if(active){setData(b.data);setError('');}}).catch(()=>{if(active)setError('更新数据读取失败，显示原数据');});void load();window.addEventListener('cases-updated',load);return()=>{active=false;window.removeEventListener('cases-updated',load);};},[]);return {data,error};}
+export function CaseCount(){const {data}=useCases();return <>{data.cases.length}</>;}
+export function CaseUpdate(){const [busy,setBusy]=useState(false),[message,setMessage]=useState('');useEffect(()=>{let active=true;const poll=async()=>{try{const b=await(await fetch('/api/cases/refresh',{cache:'no-store'})).json();if(!active)return;setBusy(b.data.status==='running');if(b.data.status!=='idle')setMessage(b.data.message);if(b.data.status==='done')window.dispatchEvent(new Event('cases-updated'));}catch{if(active)setMessage('更新状态读取失败');}};const timer=setInterval(()=>void poll(),3000);void poll();return()=>{active=false;clearInterval(timer);};},[]);
+ async function update(){setBusy(true);try{const r=await fetch('/api/cases/refresh',{method:'POST'});const b=await r.json();if(!b.ok)throw new Error(b.error.message);setMessage('正在采集并重新聚类…');}catch(e){setBusy(false);setMessage(e instanceof Error?e.message:'更新失败');}}
+ return <div className="my-4 flex flex-wrap items-center gap-3"><button className="editorial-button" disabled={busy} onClick={update}>{busy?'更新中…':'更新设计本数据'}</button><span role="status" className="text-sm">{message}</span></div>;}
