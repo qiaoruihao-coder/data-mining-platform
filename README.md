@@ -2,11 +2,15 @@
 
 以家装需求、服务方匹配与履约管理为场景，结合住宅案例聚类和双向推荐的课程项目。此仓库保存桌面平台的当前源码快照及更新版答辩 PPT（2026-11-21）。
 
+## 原账号自动登录更新
+
+原公网入口已改为原账号自动登录，保留原数据库。打开业主、服务方、平台运营页面会登录对应原账号，持有链接者可查看和修改原记录。实际核验36条需求、47份报价、16条已完成订单及相关履约数据均未改变。部署开关、测试与备份说明见 [原账号自动登录](ai-home-platform/docs/requests/D-original-auto-login.md)。独立演示站仍使用单独的合成数据库。
+
 ## HTTPS 登录与演示入口
 
 | 入口 | 使用方式 |
 |---|---|
-| [原账号登录](https://styles-advanced-photo-carmen.trycloudflare.com) | 右上角选择业主、服务方或平台运营，用原账号密码登录；原业务数据保留。 |
+| [原账号登录](https://styles-advanced-photo-carmen.trycloudflare.com) | 打开后自动登录原业主账号，切换服务方或平台运营时自动登录对应原账号；原业务数据保留。 |
 | [三角色一键演示](https://nutritional-benchmark-symbols-spears.trycloudflare.com) | 点击“以业主演示 / 以服务方演示 / 以平台运营演示”，无需密码，使用独立合成数据。 |
 
 **演示二维码：**
@@ -19,17 +23,17 @@
 
 入口更新于2026-11-22。这两个HTTPS地址是临时Cloudflare隧道，需演示电脑保持联网、服务及隧道运行；重新建立隧道可能更换地址。无需连接同一校园网或热点，但实际手机网络可达性仍需现场确认。旧的校园网/热点HTTP二维码不再作为登录入口。
 
-原账号首次访问新域名或新设备需要重新登录，之后按现有30天会话保持登录；退出、会话失效或浏览器清理Cookie后需重登。不复制旧浏览器会话，不公开账号密码。演示站与正常站使用不同数据库和域名；演示角色切换撤销上一角色会话，顶部持续标记模拟数据。正常站拒绝免密端点。
+原账号入口已明确开放公网免密访问：持有链接者可查看和修改原记录。首次访问或会话失效时自动签发原账号会话；有效会话复用，角色切换清除其他角色的浏览器Cookie。密码不写入前端、不随仓库公开。独立演示站使用不同数据库和域名。关闭 `PUBLIC_ACCOUNT_ACCESS` 后恢复密码登录要求。
 
 ## 双入口部署
 
-正常实例使用原 `.env` / 数据库，`ISOLATED_DEMO` 保持关闭。演示实例必须单独设置绝对 `DATABASE_URL=file:.../isolated-role-demo.db`，运行 `node node_modules/tsx/dist/cli.mjs scripts/prepare-isolated-demo.ts` 后设置 `ISOLATED_DEMO=true`、`AI_MODE=mock`；不要复制原业务数据库或密码凭据。脚本拒绝非演示标记的已有数据库。
+原账号实例使用原数据库，`ISOLATED_DEMO` 保持关闭，并显式配置 `PUBLIC_ACCOUNT_ACCESS=true`、`PUBLIC_OWNER_ID`、`PUBLIC_PROVIDER_ID`、`PUBLIC_ADMIN_ID`。账号必须已存在且角色匹配，不自动创建账号或业务数据。配置 `DATABASE_URL` 指向原库，构建后运行 `node scripts/start-public-access.mjs`。不要在原库运行初始化或种子脚本。演示实例必须单独设置绝对 `DATABASE_URL=file:.../isolated-role-demo.db`，运行 `node node_modules/tsx/dist/cli.mjs scripts/prepare-isolated-demo.ts` 后设置 `ISOLATED_DEMO=true`、`AI_MODE=mock`；不要复制原业务数据库或密码凭据。脚本拒绝非演示标记的已有数据库。
 
 两个实例分别配置 `INTERNAL_APP_URL` 指向自身本地地址，`NORMAL_APP_URL` / `DEMO_APP_URL` 指向各自HTTPS域名。`BUILD_VARIANT=dual` 可使用独立 `.next-dual` 构建目录；构建与启动使用相同值。手机登录必须使用HTTPS，保留Secure Cookie，不建议通过关闭安全属性兼容HTTP。
 
-2026-11-22全量检查：1039项测试，987通过、52失败；新增测试通过，失败数量与修改前一致，未声称全量通过。原工作区已有跨A/B/C/D角色改动，整体scope检查未通过，本次新增代码均在D负责路径。
+此前双入口版本的全量检查：1039项测试，987通过、52失败；新增测试通过，失败数量与修改前一致，未声称全量通过。原工作区已有跨A/B/C/D角色改动，整体scope检查未通过，本次新增代码均在D负责路径。
 
-验证：新登录隔离测试及原演示会话测试共13项通过；类型检查、lint和生产构建通过。真实HTTPS下三个演示角色均可登录、读取会话和访问页面，运营页权限通过，退出后失效；正常入口免密POST返回404。原账号密码未由自动化代填，需各自实际登录验收。浏览器自动预览工具超时，本次页面检查采用HTTP请求。
+本次自动登录验证：类型检查、生产构建、模块导入边界检查通过；专用数据库副本上的登录回归测试通过。全新 Edge 浏览器上下文实测公网 HTTPS 三角色自动登录、需求与订单读取及运营页面访问，无页面脚本错误。原库36条需求、47份报价、16条已完成订单及相关业务表逐行与备份一致，其中原业主可见31条需求，当前服务方可见15条订单。本次未重跑全量历史测试，不宣称全量通过。
 
 ## 功能
 
@@ -55,7 +59,7 @@
 
 ## 本地启动
 
-需要 Node.js >=20.19（建议22）和 npm。
+需要 Node.js >=20.19（建议22）和 npm。以下命令仅用于新建独立开发库；已有原库请使用上面的部署方式，不执行 `db:setup`。
 
 ```powershell
 git clone https://github.com/qiaoruihao-coder/data-mining-platform.git
